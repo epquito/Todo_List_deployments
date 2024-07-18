@@ -1,0 +1,8 @@
+03-variables.tf
+backend-config.hcl
+aws_ec2.yml
+role.yml 
+/5_todolist_worker_node_role/vars/main.yml
+/5_todolist_worker_node_role/vars/vault.yml
+.terraform*
+terraform*

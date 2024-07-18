@@ -1,0 +1,2 @@
+TodoList: <ec2_public_ip>
+MYSQL_DATABASE_HOST: <RDS endpoint>

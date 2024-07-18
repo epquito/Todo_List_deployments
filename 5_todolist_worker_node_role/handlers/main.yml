@@ -1,0 +1,9 @@
+---
+- name: restarting todolist
+  systemd:
+   name: todolist.service
+   state: restarted
+- name: restarting nginx
+  systemd:
+   name: nginx
+   state: restarted

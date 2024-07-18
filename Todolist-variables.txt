@@ -1,0 +1,161 @@
+variable "aws_region" {
+    description = "AWS region for resource deployment"
+    type        = string
+    default     = ""
+}
+
+variable "aws_profile" {
+    description = "AWS profile within the operating system"
+    type        = string
+    default     = ""
+}
+
+## VPC
+
+variable "vpc_cidr_block" {
+    description = "Full scope network range for the VPC"
+    type        = string
+    default     = ""
+}
+
+variable "vpc_tenancy" {
+    description = "Network speed (tenancy) for the VPC"
+    type        = string
+    default     = ""
+}
+
+variable "vpc_enable_dns_hostnames" {
+    description = "Enable DNS hostnames for the VPC"
+    type        = bool
+    default     = true
+}
+
+variable "vpc_enables_dns_support" {
+    description = "Enable DNS support for the VPC"
+    type        = bool
+    default     = true
+}
+
+variable "vpc_name" {
+    description = "Name of the VPC in the AWS console"
+    type        = string
+    default     = ""
+}
+
+variable "vpc_igw_name" {
+    description = "Name of the Internet Gateway (IGW) in the VPC"
+    type        = string
+    default     = ""
+}
+
+variable "public_subnet_1_cidr_block" {
+    description = "CIDR block for the first public subnet"
+    type        = string
+    default     = ""
+}
+
+variable "public_subnet_1_name" {
+    description = "Name of the first public subnet"
+    type        = string
+    default     = ""
+}
+
+variable "public_subnet_2_cidr_block" {
+    description = "CIDR block for the second public subnet"
+    type        = string
+    default     = ""
+}
+
+variable "public_subnet2_name" {
+    description = "Name of the second public subnet"
+    type        = string
+    default     = ""
+}
+
+variable "rt_cidr_block_igw" {
+    description = "CIDR block allowed for internet traffic through the IGW"
+    type        = string
+    default     = ""
+}
+
+variable "rt_local_cidr_block" {
+    description = "CIDR block for local traffic within the VPC"
+    type        = string
+    default     = ""
+}
+
+variable "rt_local_gateway_id" {
+    description = "Gateway ID for local traffic routing"
+    type        = string
+    default     = ""
+}
+
+variable "rt_name" {
+    description = "Name of the route table"
+    type        = string
+    default     = ""
+}
+
+variable "nacl_name" {
+    description = "Name of the Network Access Control List (NACL)"
+    type        = string
+    default     = ""
+}
+
+variable "default_sg_name" {
+    description = "Name of the default security group"
+    type        = string
+    default     = ""
+}
+
+## EC2
+
+variable "ec2_instance_type" {
+    description = "Type of EC2 instance"
+    type        = string
+    default     = ""
+}
+
+variable "ec2_key_file" {
+    description = "PEM key file for SSH access to EC2 instances"
+    type        = string
+    default     = ""
+}
+
+variable "ec2_target_node_name" {
+    description = "Name of the EC2 instance in the AWS console"
+    type        = string
+    default     = ""
+}
+
+variable "ec2_type_node" {
+    description = "Type of node (master or worker) for dynamic inventory in Ansible"
+    type        = string
+    default     = ""
+}
+
+## S3
+
+variable "bucket_name" {
+    description = "Name of the S3 bucket"
+    type        = string
+    default     = ""
+}
+
+variable "environment" {
+    description = "Environment for the S3 bucket"
+    type        = string
+    default     = ""
+}
+
+variable "sse_algorithm" {
+    description = "Server-side encryption algorithm"
+    type        = string
+    default     = "AES256"
+}
+
+variable "dynamodb_table_name" {
+    description = "Name of the DynamoDB table for state locking"
+    type        = string
+    default     = ""
+}

@@ -1,0 +1,186 @@
+---
+- name: Update apt cache
+  apt:
+    update_cache: yes
+
+- name: Install necessary packages
+  apt:
+    name: 
+      - git
+      - python3
+      - python3-pip
+      - gunicorn
+      - nginx
+    state: latest
+
+- name: Install boto3 via pip
+  ansible.builtin.pip:
+    name: boto3
+    state: present
+
+- name: Clone GitHub repository
+  ansible.builtin.git:
+    repo: "https://github.com/chandradeoarya/todolist-flask.git"
+    dest: "/home/ubuntu/todolist-flask"
+    single_branch: yes
+    version: env
+
+- name: Change file ownership, group and permissions
+  ansible.builtin.file:
+    path: /home
+    mode: '0755'
+- name: Change file ownership, group and permissions
+  ansible.builtin.file:
+    path: /home/ubuntu
+    mode: '0755'
+- name: Change file ownership, group and permissions
+  ansible.builtin.file:
+    path: /home/ubuntu/todolist-flask
+    mode: '0755'
+
+
+- name: Update API URL in index.html
+  lineinfile:
+    path: /home/ubuntu/todolist-flask/index.html
+    regexp: "const API_URL ="
+    line: "const API_URL = 'http://{{ TodoList }}'"
+
+- name: Update port in todo.py
+  lineinfile:
+    path: /home/ubuntu/todolist-flask/todo.py
+    regexp: "app.run(host='0.0.0.0', port=80)"
+    line: "app.run(host='0.0.0.0', port=9876)"
+
+- name: Create .env file
+  copy:
+    dest: "/home/ubuntu/todolist-flask/.env"
+    content: |
+      MYSQL_DATABASE_HOST={{ MYSQL_DATABASE_HOST }}
+      MYSQL_DATABASE={{ MYSQL_DATABASE }}
+      MYSQL_DATABASE_USER={{ MYSQL_DATABASE_USER }}
+      MYSQL_DATABASE_PASSWORD={{ MYSQL_DATABASE_PASSWORD }}
+      MYSQL_DATABASE_PORT={{ MYSQL_DATABASE_PORT }}
+    mode: '0644'
+
+- name: Update .env file to remove port number from MYSQL_DATABASE_HOST
+  lineinfile:
+    path: /home/ubuntu/todolist-flask/.env
+    regexp: "^MYSQL_DATABASE_HOST=.*"
+    line: "MYSQL_DATABASE_HOST={{ MYSQL_DATABASE_HOST.split(':')[0] }}"
+
+- name: Install Python requirements
+  pip:
+    requirements: /home/ubuntu/todolist-flask/requirements.txt
+    chdir: /home/ubuntu/todolist-flask
+
+- name: Create Gunicorn config file
+  ansible.builtin.file:
+    path: /home/ubuntu/todolist-flask/gunicorn_config.py
+    state: touch
+    mode: u+rwx
+
+- name: Add configurations to Gunicorn
+  ansible.builtin.blockinfile:
+    path: /home/ubuntu/todolist-flask/gunicorn_config.py
+    block: |
+      # BEGIN ANSIBLE MANAGED BLOCK
+      preload_app = True
+      bind = "127.0.0.1:9876"
+      workers = 4
+      # END ANSIBLE MANAGED BLOCK
+    mode: u+rwx
+
+- name: Create systemd service file for Gunicorn
+  ansible.builtin.file:
+    path: /etc/systemd/system/todolist.service
+    state: touch
+    mode: u+rwx
+
+- name: Add content to todolist service file
+  ansible.builtin.blockinfile:
+    path: /etc/systemd/system/todolist.service
+    block: |
+      # BEGIN ANSIBLE MANAGED BLOCK
+      [Unit]
+      Description=Gunicorn instance to serve todolist
+      Wants=network.target
+      After=syslog.target network-online.target
+
+      [Service]
+      Type=simple
+      WorkingDirectory=/home/ubuntu/todolist-flask
+      EnvironmentFile=/home/ubuntu/todolist-flask/.env
+
+      ExecStart=/usr/bin/gunicorn todo:app -c /home/ubuntu/todolist-flask/gunicorn_config.py
+      Restart=always
+      RestartSec=10
+
+      [Install]
+      WantedBy=multi-user.target
+      # END ANSIBLE MANAGED BLOCK
+
+- name: Reload systemd to apply the new service
+  systemd:
+    daemon-reload: yes
+
+- name: Start and enable todolist service
+  systemd:
+    name: todolist.service
+    state: started
+    enabled: yes
+
+- name: Create Nginx configuration file
+  copy:
+    dest: /etc/nginx/sites-available/todolist
+    content: |
+      server {
+          listen 80;
+          server_name {{TodoList}};
+
+          # Serve static files
+          location / {
+              root /home/ubuntu/todolist-flask;
+              index index.html;
+              try_files $uri $uri/ /index.html;
+          }
+
+          # Proxy API requests to Gunicorn
+          location /todos {
+              proxy_pass http://127.0.0.1:9876;
+              proxy_set_header Host $host;
+              proxy_set_header X-Real-IP $remote_addr;
+              proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+              proxy_set_header X-Forwarded-Proto $scheme;
+          }
+
+          error_log /var/log/nginx/todolist_error.log;
+          access_log /var/log/nginx/todolist_access.log;
+      }
+
+    mode: '0644'
+
+- name: Remove default site from sites-enabled
+  file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+
+- name: Create a symbolic link for Nginx configuration
+  ansible.builtin.file:
+    src: /etc/nginx/sites-available/todolist
+    dest: /etc/nginx/sites-enabled/todolist
+    state: link
+
+- name: Reload Nginx
+  systemd:
+    name: nginx
+    state: reloaded
+
+- name: Start and enable Nginx
+  systemd:
+    name: nginx
+    state: started
+    enabled: yes
+- name: Notify nginx within handlers directory 
+  systemd:
+    name: nginx
+    state: reloaded 

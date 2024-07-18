@@ -1,0 +1,9 @@
+---
+- name: ansible ec2
+  hosts: tag_Type_< Ec2 tag type value " Type = <value>">
+  become: true
+  vars_files:
+   - <path/to/the/variables/directory/specific/variables yml file>
+   - <path/to/the/variables/directory/specific/vault variables yml file>
+  roles:
+   - { role: 5_todolist_worker_node_role}
