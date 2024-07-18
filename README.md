@@ -85,7 +85,7 @@ ansible-vault edit <name of vault.yml> ## to edit the file also have to input va
 
 ```
 
-## Commands to Execute in Terminal once all Terraform and Ansible files are configured within your Operating System
+## Initialize Terraform configuration 
 
 Execute the following commands in the terminal:
 
@@ -93,6 +93,30 @@ Execute the following commands in the terminal:
 terraform init
 terraform plan
 terraform apply
-ansible-vault create vault.yml
+```
+
+## Initialize Terraform Configuration to Promote Remote Backend Utilizing S3, DynamoDB
+
+- Make sure to change the values within `s3-remote-backend.hcl` but keep the key
+
+```bash
+terraform init -backend-config=s3-remote-backend.hcl
+terraform plan -out=tfplan
+terraform apply tfplan
+```
+
+### Explanation:
+
+- **`terraform init -backend-config=s3-remote-backend.hcl`**: Initializes the Terraform configuration with the backend settings specified in `s3-remote-backend.hcl`.
+- **`terraform plan -out=tfplan`**: Creates an execution plan and saves it to `tfplan`.
+- **`terraform apply tfplan`**: Applies the saved plan to provision the infrastructure.
+
+This structure ensures that the commands are correctly formatted and provide clear instructions on how to initialize and apply the Terraform configuration with a remote backend.
+
+
+## Finally run the Ansible yml configurations within project directory
+
+```bash
 ansible-playbook --ask-vault-pass role.yml -i aws_ec2.yml -u ubuntu --private-key=/path/to/pem/file
+
 ```
