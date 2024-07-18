@@ -9,6 +9,8 @@ terraform {
       version = "5.58.0"
     }
   }
+  # backend "s3" {
+  # }
 }
 
 data "aws_ami" "ubuntu_22" {

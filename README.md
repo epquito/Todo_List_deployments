@@ -85,7 +85,7 @@ ansible-vault edit <name of vault.yml> ## to edit the file also have to input va
 
 ```
 
-## Initialize Terraform configuration 
+## Initialize Terraform configuration make sure within the "Providers.tf" the backend attribute is commented out
 
 Execute the following commands in the terminal:
 
@@ -96,6 +96,8 @@ terraform apply
 ```
 
 ## Initialize Terraform Configuration to Promote Remote Backend Utilizing S3, DynamoDB
+## uncomment the backend attribute within "Providers.tf"
+
 
 - Make sure to change the values within `s3-remote-backend.hcl` but keep the key
 
@@ -104,7 +106,6 @@ terraform init -backend-config=s3-remote-backend.hcl
 terraform plan -out=tfplan
 terraform apply tfplan
 ```
-
 ### Explanation:
 
 - **`terraform init -backend-config=s3-remote-backend.hcl`**: Initializes the Terraform configuration with the backend settings specified in `s3-remote-backend.hcl`.
@@ -118,5 +119,24 @@ This structure ensures that the commands are correctly formatted and provide cle
 
 ```bash
 ansible-playbook --ask-vault-pass role.yml -i aws_ec2.yml -u ubuntu --private-key=/path/to/pem/file
+
+```
+
+## Once all configuration files are deployed the proper way to delete it is by doing the following:
+
+```bash
+terraform init -backend-config=s3-remote-backend.hcl
+
+## allocated s3 and dynamodb names 
+terraform state list
+
+## remove them from state
+
+terraform state rm 'aws_s3_bucket.your_bucket_name'
+terraform state rm 'aws_dynamodb_table.your_table_name'
+
+## auto destroy all resources
+
+terraform destroy -auto-approve
 
 ```

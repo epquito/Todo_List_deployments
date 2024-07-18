@@ -6,3 +6,4 @@ role.yml
 /5_todolist_worker_node_role/vars/vault.yml
 .terraform*
 terraform*
+tfplan
